@@ -1,0 +1,71 @@
+--- a/upnphttp.c	2020-11-24 10:53:50.000000000 -0800
++++ b/upnphttp.c	2023-03-23 21:14:51.000000000 -0700
+@@ -62,6 +62,7 @@
+ #include <sys/time.h>
+ #include <sys/resource.h>
+ #include <limits.h>
++#include <libexif/exif-loader.h>
+ 
+ #include "config.h"
+ #include "event.h"
+@@ -76,7 +77,6 @@
+ #include "image_utils.h"
+ #include "log.h"
+ #include "sql.h"
+-#include <libexif/exif-loader.h>
+ #include "tivo_utils.h"
+ #include "tivo_commands.h"
+ #include "clients.h"
+@@ -115,7 +115,7 @@
+ 		return NULL;
+ 	memset(ret, 0, sizeof(struct upnphttp));
+ 	ret->ev = (struct event ){ .fd = s, .rdwr = EVENT_READ, .process = Process_upnphttp, .data = ret };
+-	event_module.add(&ret->ev);
++	/* event_module.add(&ret->ev); */
+ 	return ret;
+ }
+ 
+@@ -123,11 +123,11 @@
+ CloseSocket_upnphttp(struct upnphttp * h)
+ {
+ 
+-	event_module.del(&h->ev, EV_FLAG_CLOSING);
+-	if(close(h->ev.fd) < 0)
+-	{
+-		DPRINTF(E_ERROR, L_HTTP, "CloseSocket_upnphttp: close(%d): %s\n", h->ev.fd, strerror(errno));
+-	}
++	//event_module.del(&h->ev, EV_FLAG_CLOSING);
++	/* if(close(h->ev.fd) < 0) */
++	/* { */
++	/* 	DPRINTF(E_ERROR, L_HTTP, "CloseSocket_upnphttp: close(%d): %s\n", h->ev.fd, strerror(errno)); */
++	/* } */
+ 	h->ev.fd = -1;
+ 	h->state = 100;
+ }
+@@ -146,7 +146,7 @@
+ }
+ 
+ /* parse HttpHeaders of the REQUEST */
+-static void
++void
+ ParseHttpHeaders(struct upnphttp * h)
+ {
+ 	int client = 0;
+@@ -664,7 +664,7 @@
+ 
+ /* ProcessHTTPPOST_upnphttp()
+  * executes the SOAP query if it is possible */
+-static void
++void
+ ProcessHTTPPOST_upnphttp(struct upnphttp * h)
+ {
+ 	if((h->req_buflen - h->req_contentoff) >= h->req_contentlen)
+@@ -833,7 +833,7 @@
+ 
+ /* Parse and process Http Query 
+  * called once all the HTTP headers have been received. */
+-static void
++void
+ ProcessHttpQuery_upnphttp(struct upnphttp * h)
+ {
+ 	char HttpCommand[16];
